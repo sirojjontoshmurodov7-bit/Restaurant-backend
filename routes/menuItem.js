@@ -16,8 +16,7 @@ router.get("/", getMenuItems);
 
 router.get("/:id", getMenuItem);
 
-router.post("/", upload.single("image"), createMenuItem);
-
+router.post("/", createMenuItem);
 router.put("/:id", editMenuItem);
 
 router.delete("/:id", deleteMenuItem);
