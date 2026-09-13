@@ -27,29 +27,42 @@ exports.getMenuItem = async (req, res) => {
     }
 }
 exports.createMenuItem = async (req, res) => {
-  try {
-    const validation = menuItemValidation.safeParse(req.body);
+    try {
+        console.log("BODY IMAGE:", req.body.image);
 
-    if (!validation.success) {
-      return res.status(400).json({
-        message: validation.error.issues.map((issue) => issue.message),
-      });
+        const validation = menuItemValidation.safeParse(req.body);
+
+        if (!validation.success) {
+            return res.status(400).json({
+                message: validation.error.issues.map(
+                    (issue) => issue.message
+                ),
+            });
+        }
+
+        console.log(
+            "VALIDATED IMAGE:",
+            validation.data.image
+        );
+
+        const menuItem = await MenuItem.create(
+            validation.data
+        );
+
+        console.log(
+            "SAVED IMAGE:",
+            menuItem.image
+        );
+
+        res.status(201).json({
+            message: "Mahsulot yaratildi!",
+            data: menuItem,
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: `Xatolik yuz berdi: ${error.message}`,
+        });
     }
-
-    const menuItem = await MenuItem.create({
-      ...validation.data,
-      image: req.file ? `/uploads/${req.file.filename}` : null,
-    });
-
-    res.status(201).json({
-      message: "Mahsulot yaratildi!",
-      data: menuItem,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: `Xatolik yuz berdi: ${error.message}`,
-    });
-  }
 };
 exports.editMenuItem = async (req, res) => {
     try {
@@ -59,7 +72,7 @@ exports.editMenuItem = async (req, res) => {
                 message: validation.error.issues.map(issue => issue.message)
             })
         }
-        const menuItem = await MenuItem.findByIdAndUpdate(req.params.id, validation.data, {new: true, runValidators: true})
+        const menuItem = await MenuItem.findByIdAndUpdate(req.params.id, validation.data, { new: true, runValidators: true })
         if (!menuItem) {
             return res.status(404).json({
                 message: `Mahsulot topilmadi!`
